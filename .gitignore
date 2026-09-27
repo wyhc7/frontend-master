@@ -1,0 +1,17 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editors
+.vscode/
+.idea/
+*.swp
+
+# logs / temp
+*.log
+*.tmp
+_datalayer_probe*
+
+# node
+node_modules/

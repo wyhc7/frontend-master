@@ -1,0 +1,65 @@
+<!--
+  Clean fixture for scripts/audit.mjs -- the negative test.
+  This file must produce ZERO findings:
+    node scripts/audit.mjs scripts/selftest/clean.html
+  If it reports anything, a rule has a false positive and must be tightened.
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>溪谷烘焙 · 当季生豆</title>
+  <style>
+    @font-face {
+      font-family: 'Display';
+      src: url('/fonts/display.woff2') format('woff2');
+      font-display: swap;
+    }
+    :root {
+      --ink: #14120e;
+      --paper: #fbfaf8;
+      --rule: #d8d5ce;
+      --accent: #b3261e;
+    }
+    body { background: var(--paper); color: var(--ink); }
+    .card { border-radius: 2px; }
+    .pill { border-radius: 999px; }
+    .field { border-radius: 4px; border: 1px solid var(--rule); }
+    .cta { transition: transform 160ms cubic-bezier(.22, 1, .36, 1); }
+    .cta:hover { transform: translateY(-1px); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) {
+      .cta { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>溪谷烘焙</h1>
+    <p>每周三烘焙，周四发货。豆子从到港到入炉不超过十天。</p>
+  </header>
+
+  <main>
+    <article class="card">
+      <img src="/beans/ethiopia-guji.webp" alt="古吉日晒批次的手检台" width="960" height="540">
+      <h2>古吉 · 日晒</h2>
+      <p>批次 0412 · 海拔 2050m · 烘焙度 中浅</p>
+    </article>
+
+    <form action="/subscribe" method="post">
+      <label for="email">邮箱</label>
+      <input class="field" id="email" name="email" type="email" autocomplete="email">
+      <label for="grind">研磨度</label>
+      <select class="field" id="grind" name="grind">
+        <option value="whole">不磨</option>
+        <option value="filter">手冲</option>
+      </select>
+      <button class="cta pill" type="submit">订阅当季批次</button>
+    </form>
+  </main>
+
+  <footer>
+    <a href="/shipping">配送说明</a>
+  </footer>
+</body>
+</html>

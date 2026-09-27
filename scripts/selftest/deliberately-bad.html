@@ -1,0 +1,51 @@
+<!--
+  Deliberately-bad fixture for scripts/audit.mjs.
+  Every marker below should be caught by the machine gate:
+    node scripts/audit.mjs scripts/selftest/deliberately-bad.html
+  This file is excluded from directory scans via SKIP_DIR ('selftest').
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style>
+    @font-face {
+      font-family: 'Display';
+      src: url('/fonts/display.woff2') format('woff2');
+    }
+    .card { border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, .1); }
+    .button { border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, .1); transition: all 300ms ease; }
+    .input { border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, .1); outline: none; }
+    .eyebrow-one { text-transform: uppercase; letter-spacing: .2em; }
+    .eyebrow-two { text-transform: uppercase; letter-spacing: .2em; }
+    .eyebrow-three { text-transform: uppercase; letter-spacing: .2em; }
+    .tile-a:hover { transform: translateY(-4px); }
+    .tile-b:hover { transform: translateY(-4px); }
+    .tile-c:hover { transform: translateY(-4px); }
+    .tile-d:hover { transform: translateY(-4px); }
+    .slider { transition: width 400ms ease; }
+    .hero { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>Lorem ipsum dolor sit amet</h1>
+    <p>Contact Jane Doe at hello@example.com for a demo.</p>
+  </div>
+
+  <img src="/hero.jpg">
+  <img src="/logo.svg" width="120">
+
+  <form>
+    <input type="email" placeholder="Email address">
+    <select><option>One</option></select>
+    <textarea rows="3"></textarea>
+  </form>
+
+  <div onclick="submitForm()">Submit</div>
+  <a href="/pricing"></a>
+  <span class="icon">🍕</span>
+
+  <div class="hero" style="background: linear-gradient(135deg, #6366f1, #8b5cf6)"></div>
+</body>
+</html>

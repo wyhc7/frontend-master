@@ -1,0 +1,5 @@
+# normalise line endings for a cross-platform text project
+* text=auto eol=lf
+
+# keep fixtures byte-stable so the audit regression baseline stays valid
+scripts/selftest/*.html text eol=lf
