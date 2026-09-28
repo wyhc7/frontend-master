@@ -1,12 +1,12 @@
 # frontend-master
 
-> 最强前端 Agent Skill：五源融合 + 可机器验证的自检闭环。目标是产出**不像 AI 做的前端**，而且这个判断由机器复核，不由感觉决定。
+> 最强前端 Agent Skill：七源融合 + 可机器验证的自检闭环。目标是产出**不像 AI 做的前端**，而且这个判断由机器复核，不由感觉决定。
 
 ## 它解决什么问题
 
 AI 写前端有两个顽疾：一是**一眼 AI**（统一圆角、同一个柔和阴影、每屏"居中大标题 + 三张卡"、紫靛渐变、`Lorem ipsum`），二是**不可验证**（"看起来不错"无法反驳，也没法回归）。这个 skill 对两者分别给出机制：前者是显式的 AI-tells 黑名单与具名审美方向，后者是能跑出退出码的审计器。
 
-## 五源融合
+## 七源融合
 
 | 来源 | 拿走的核心机制 |
 |---|---|
@@ -16,8 +16,10 @@ AI 写前端有两个顽疾：一是**一眼 AI**（统一圆角、同一个柔�
 | `taste-skill` | Design Read 前置、三旋钮量化、AI-tells 黑名单、依赖验证 |
 | `pbakaus/impeccable` | 设计操作符（polish / bolder / quieter / distill / delight） |
 | `ui-ux-pro-max` | BM25 设计智能检索层：88 风格 · 192 产品配色 · 74 官方字对 · 119 UX 规则 · 44 React 性能规则 · 17 动效预设 · 22 技术栈 |
+| `greensock/gsap-skills`（GSAP 官方） | 网页动效实现层：核心 API、时间轴、ScrollTrigger、**插件已全免费**（Webflow 收购后）、React 与框架集成、性能红线 |
+| `emilkowalski/skills` | 动效品味与标准：频率门（该不该动）、缓动决策树、时长分档、物理性禁令、可打断性、逐帧验证 |
 
-四家都缺的一环由本 skill 补上：**可机器验证的自检闭环**。
+这些来源都缺的一环由本 skill 补上：**可机器验证的自检闭环**。
 
 ## 核心设计：两条知识层的仲裁
 
@@ -54,12 +56,13 @@ references/
   01-design-read.md          需求推断与旋钮推导
   02-aesthetic-directions.md 12 个具名方向的完整 token 配方
   03-typography-color.md     字阶、字对、色彩 token 分层、WCAG 阈值、暗模式
-  04-motion.md               三档强度、时长缓动表、GSAP 预设、reduced-motion
+  04-motion.md               频率门、三档强度、缓动决策树、物理性禁令、reduced-motion
   05-layout-architecture.md  栅格、间距刻度、密度映射、响应式、层叠
   06-engineering.md          React 性能分级、依赖验证、无障碍条款、CLS
   07-ai-tells.md             反 AI 味黑名单（写码前必读）
   08-critique.md             评审协议、严重度分级、六个操作符判定
   09-copy.md                 界面文案、错误公式、空态、中英混排
+  10-web-animation.md        动效实现层：库路由、GSAP、ScrollTrigger、手势、逐帧验证
 scripts/
   audit.mjs                  P4 机器审计器（按文件类型分派规则）
   data.mjs                   检索层桥接（转发到 BM25 引擎）
@@ -125,6 +128,7 @@ node scripts/audit.mjs ./src --json
 - **真实内容（CRITICAL）**：`Lorem ipsum`、`Jane Doe`、`example.com`
 - **依赖验证（CRITICAL）**：import 了未在 `package.json` 声明的包
 - **AI-tells（WARN）**：全站统一圆角、重复柔和阴影、紫靛渐变、近黑 + 高饱和强调、eyebrow 形式外壳、hover 位移滥用
+- **动效（WARN）**：入场用 `ease-in`、从 `scale(0)` 出现、`@keyframes` 动画布局属性、Framer Motion 的 `x`/`y` 简写（走主线程 rAF）、`scroll`/`wheel`/`touch` 监听未声明 `passive`、hover 位移无指针精度门控
 - **性能（WARN）**：`transition: all`、对布局属性做过渡、图片未声明尺寸、`@font-face` 缺 `font-display`、有动效但无 `prefers-reduced-motion`
 
 规则按文件类型分派（markup / style / script 各走各的），所以实现文件不会因为源码里写着 `<img` 而被误报。
@@ -136,7 +140,7 @@ node scripts/audit.mjs ./src --json
 改过 `audit.mjs` 的规则后跑夹具：
 
 ```bash
-node scripts/audit.mjs scripts/selftest/deliberately-bad.html   # 期望 CRITICAL 11 · WARN 14，退出码 1
+node scripts/audit.mjs scripts/selftest/deliberately-bad.html   # 期望 CRITICAL 11 · WARN 20，退出码 1
 node scripts/audit.mjs scripts/selftest/clean.html              # 期望 0 findings，退出码 0
 ```
 

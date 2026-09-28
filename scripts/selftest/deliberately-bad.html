@@ -24,6 +24,9 @@
     .tile-c:hover { transform: translateY(-4px); }
     .tile-d:hover { transform: translateY(-4px); }
     .slider { transition: width 400ms ease; }
+    .fade-in { transition: opacity 300ms ease-in; }
+    .pop { transform: scale(0); }
+    @keyframes grow { from { width: 0; } to { width: 100%; } }
     .hero { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
   </style>
 </head>
@@ -47,5 +50,11 @@
   <span class="icon">🍕</span>
 
   <div class="hero" style="background: linear-gradient(135deg, #6366f1, #8b5cf6)"></div>
+
+  <!-- Framer Motion 简写：animate={{ x: 100 }} —— 走主线程 rAF，负载下掉帧 -->
+  <script>
+    // 非 passive 监听（滚动线程无法并行处理）
+    window.addEventListener('scroll', function () {});
+  </script>
 </body>
 </html>

@@ -94,7 +94,7 @@ node ~/.dsh/skills/frontend-master/scripts/audit.mjs <目录或文件...>
 
 1. 机器能判定的不许再写进人工清单当意见；人工发现可正则化的问题，标注"可机械化"，本轮不改 `audit.mjs`。
 2. 结论冲突时以人工为准，但必须给出判定理由（脚本报统一圆角而简报要求"全部锐角"——这是决定而非遗漏，见 07-A1）；审计全绿而截图仍"一眼 AI"，说明缺的是人工那条证据，回 `07-ai-tells.md` 的 A/B/C 三类逐条目视。
-3. 改过 `audit.mjs` 规则后必须跑夹具回归：`scripts/selftest/deliberately-bad.html` 期望 `CRITICAL 11 · WARN 14`，`scripts/selftest/clean.html` 期望 0 findings；数值对不上说明规则被改坏。
+3. 改过 `audit.mjs` 规则后必须跑夹具回归：`scripts/selftest/deliberately-bad.html` 期望 `CRITICAL 11 · WARN 20`，`scripts/selftest/clean.html` 期望 0 findings；数值对不上说明规则被改坏。
 4. 凡采用检索层（`scripts/data.mjs`）给出的风格或配色，评审时按 SKILL.md 的仲裁规则复核：命中黑名单（Glassmorphism / Claymorphism / Neumorphism / Aurora UI / 紫靛渐变 / 纯黑底+高饱和强调色）的必须有写在提案里的对冲措施，否则记 `WARN` 并要求补写来源记录（哪个 domain、哪条记录）。
 
 ---

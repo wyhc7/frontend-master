@@ -26,7 +26,9 @@
     .pill { border-radius: 999px; }
     .field { border-radius: 4px; border: 1px solid var(--rule); }
     .cta { transition: transform 160ms cubic-bezier(.22, 1, .36, 1); }
-    .cta:hover { transform: translateY(-1px); }
+    @media (hover: hover) and (pointer: fine) {
+      .cta:hover { transform: translateY(-1px); }
+    }
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     @media (prefers-reduced-motion: reduce) {
       .cta { transition: none; }

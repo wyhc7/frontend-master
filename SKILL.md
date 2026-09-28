@@ -1,6 +1,6 @@
 ---
 name: frontend-master
-description: 最强前端 skill——五源融合：审美方法论与两遍法（anthropic frontend-design）+ 界面规范与性能分级（Vercel Web Interface Guidelines / React Best Practices）+ 反 AI 味黑名单与旋钮量化（taste-skill）+ 设计操作符（impeccable）+ BM25 设计智能检索层（ui-ux-pro-max：88 风格 / 192 产品配色 / 74 字对 / 119 UX 规则 / 44 React 性能规则 / 17 动效预设 / 22 技术栈）。任何涉及构建、重设计、评审界面与前端代码的任务都应触发：页面、落地页、仪表盘、组件、移动端 UI、HTML/CSS/JS/React/Vue/Svelte/Next.js、审美方向选择、排版配色、动效、设计系统抽取、无障碍与性能审计、"这个页面看起来太 AI 了"。
+description: 最强前端 skill——七源融合：审美方法论与两遍法（anthropic frontend-design）+ 界面规范与性能分级（Vercel Web Interface Guidelines / React Best Practices）+ 反 AI 味黑名单与旋钮量化（taste-skill）+ 设计操作符（impeccable）+ BM25 设计智能检索层（ui-ux-pro-max：88 风格 / 192 产品配色 / 74 字对 / 119 UX 规则 / 44 React 性能规则 / 17 动效预设 / 22 技术栈）+ 网页动效实现层（GSAP 官方 skills：核心 API / 时间轴 / ScrollTrigger / 插件已全免费 / React 与框架集成）+ 动效品味标准（emilkowalski/skills：频率门 / 缓动决策树 / 时长分档 / 物理性禁令）。任何涉及构建、重设计、评审界面与前端代码的任务都应触发：页面、落地页、仪表盘、组件、移动端 UI、HTML/CSS/JS/React/Vue/Svelte/Next.js、审美方向选择、排版配色、动效与网页动画效果（GSAP / ScrollTrigger / 滚动叙事 / 页面过渡 / 微交互 / 逐帧验证）、设计系统抽取、无障碍与性能审计、"这个页面看起来太 AI 了"。
 ---
 
 # Frontend Master
@@ -17,8 +17,10 @@ description: 最强前端 skill——五源融合：审美方法论与两遍法�
 | `taste-skill` | Design Read 前置、三旋钮量化、AI-tells 黑名单、依赖验证、硬 guardrails |
 | `pbakaus/impeccable` | 设计操作符（polish / bolder / quieter / distill / delight）作为定向改造手段 |
 | `ui-ux-pro-max` | **BM25 检索引擎**：88 风格（50 active）· 192 产品配色 · 74 官方字对 · 119 UX 规则 · 44 React 性能规则 · 17 动效预设 · 25 图表类型 · 105 图标 · 22 技术栈（1260 条规则） |
+| `greensock/gsap-skills`（GSAP 官方） | 网页动效实现层：核心 API、时间轴、ScrollTrigger、插件全免费现状、React 与框架集成、性能红线 |
+| `emilkowalski/skills` | 动效品味与标准：频率门（该不该动）、缓动决策树、时长分档、物理性禁令、可打断性、逐帧验证 |
 
-四家都缺的一环由本 skill 补上：**可机器验证的自检闭环**（`scripts/audit.mjs` + 截图比对）。
+这些来源都缺的一环由本 skill 补上：**可机器验证的自检闭环**（`scripts/audit.mjs` + 截图比对）——`motion/*` 规则让动效质量同样进得了门禁。
 
 ## 触发与不触发
 
@@ -128,6 +130,7 @@ node ~/.dsh/skills/frontend-master/scripts/data.mjs "editorial serif body sans" 
 - 布局与架构 → `references/05-layout-architecture.md`
 - 工程、性能、无障碍、依赖 → `references/06-engineering.md`
 - 文案 → `references/09-copy.md`
+- 动效实现（选库、GSAP、滚动效果、手势）→ `references/10-web-animation.md`
 - 明确禁止的写法 → `references/07-ai-tells.md`（**写码前必读**）
 
 技术栈专项规则按探测到的栈检索（22 个栈，共 1260 条）：
@@ -221,19 +224,20 @@ node ~/.dsh/skills/frontend-master/scripts/audit.mjs <目录或文件...>
 | `references/07-ai-tells.md` | **写码前必读**；以及被说"太 AI 了"时 |
 | `references/08-critique.md` | P4 自检、评审他人界面 |
 | `references/09-copy.md` | 界面文案、按钮、错误与空态 |
+| `references/10-web-animation.md` | 写任何动画效果、滚动动效、页面过渡、GSAP 代码时 |
 
 ## 脚本索引
 
 | 脚本 | 用途 | 依赖 |
 |---|---|---|
-| `scripts/audit.mjs` | P4 机器审计，`file:line` + CRITICAL/WARN，非零退出即未通过 | 仅需 Node |
+| `scripts/audit.mjs` | P4 机器审计，`file:line` + CRITICAL/WARN，非零退出即未通过；含 `motion/*` 动效规则 | 仅需 Node |
 | `scripts/data.mjs` | 检索层桥接（转发到 BM25 引擎），`check` 子命令做环境自检 | Node + Python 3 + ui-ux-pro-max |
 | `scripts/selftest/` | 两个夹具：`deliberately-bad.html` 必须被抓满，`clean.html` 必须零告警 | 仅需 Node |
 
 改过 `audit.mjs` 的规则后，用夹具回归一次：
 
 ```bash
-node ~/.dsh/skills/frontend-master/scripts/audit.mjs scripts/selftest/deliberately-bad.html   # 期望：CRITICAL 11 · WARN 14
+node ~/.dsh/skills/frontend-master/scripts/audit.mjs scripts/selftest/deliberately-bad.html   # 期望：CRITICAL 11 · WARN 20
 node ~/.dsh/skills/frontend-master/scripts/audit.mjs scripts/selftest/clean.html              # 期望：0 findings
 ```
 

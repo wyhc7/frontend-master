@@ -9,9 +9,9 @@
  *
  * Rules are dispatched by file kind, so an implementation file (.js/.mjs/.ts)
  * never trips markup rules just because a rule pattern appears in its source:
- *   markup (.html/.htm/.vue/.svelte/.astro/.jsx/.tsx) -> accessibility, content, style
- *   style  (.css/.scss/.sass/.less)                  -> accessibility (focus), style
- *   script (.js/.mjs/.ts)                            -> dependency verification only
+ *   markup (.html/.htm/.vue/.svelte/.astro/.jsx/.tsx) -> accessibility, content, style, motion
+ *   style  (.css/.scss/.sass/.less)                  -> accessibility (focus), style, motion
+ *   script (.js/.mjs/.ts)                            -> dependency verification, motion
  *
  * Usage:
  *   node scripts/audit.mjs <file-or-dir> [...more]
@@ -261,6 +261,76 @@ function auditAiTells(file, lines, full, counts) {
   }
 }
 
+/**
+ * Motion rules, distilled from the GSAP AI skills and Emil Kowalski's animation
+ * standards (see references/04 and references/10).
+ *
+ * Only the mechanically decidable ones live here. Whether a given element
+ * should animate at all is a frequency judgement (references/04 section A) and
+ * stays with the human reviewer — this function checks that the motion which
+ * does exist is built the right way.
+ */
+function auditMotion(file, lines, full, counts) {
+  const ext = extname(file).toLowerCase();
+  const markup = MARKUP_EXT.has(ext);
+  const style = STYLE_EXT.has(ext);
+  const script = ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.vue', '.svelte', '.astro'].includes(ext);
+
+  if (style || markup) {
+    lines.forEach((raw, i) => {
+      const line = i + 1;
+
+      // ease-in on a UI transition. The lookahead is load-bearing: `ease-in-out`
+      // contains `ease-in` as a substring and is a legitimate choice.
+      if (/\b(?:transition|animation)\s*:[^;{}]*\bease-in\b(?!-out)/i.test(raw)) {
+        counts.rule('motion/ease-in', () => add('WARN', file, line, 'motion/ease-in',
+          'ease-in 起步慢，正好拖住用户盯着看的那一瞬间 —— 进出用 ease-out，屏内移动用 ease-in-out'));
+      }
+
+      // scale(0) as an entry state
+      if (/transform\s*:[^;{}]*\bscale(?:3d|X|Y)?\(\s*0\s*[,)]/i.test(raw)) {
+        counts.rule('motion/scale-zero', () => add('WARN', file, line, 'motion/scale-zero',
+          '从 scale(0) 出现 —— 现实中没有东西从虚无中出现，入场起点用 scale(0.9–0.97)'));
+      }
+    });
+
+    // @keyframes that animate layout properties
+    for (const m of full.matchAll(/@keyframes[\s\S]{0,600}?(?:from|to|\d+%)\s*\{[^}]*?\b(width|height|top|left|right|margin|padding)\s*:/gi)) {
+      const line = full.slice(0, m.index).split('\n').length;
+      counts.rule('motion/keyframe-layout', () => add('WARN', file, line, 'motion/keyframe-layout',
+        `@keyframes 里动画 ${m[1]} —— 每帧走 Layout→Paint→Composite，改动画 transform/opacity`));
+      break;
+    }
+
+    // hover motion with no pointer-precision gate (a tap fires a false hover)
+    if (/:hover[^{}]*\{[^{}]*transform\s*:[^{}]*\b(?:scale|translate)/i.test(full)
+      && !/\(hover\s*:\s*hover\)/i.test(full)) {
+      counts.rule('motion/hover-ungated', () => add('WARN', file, 1, 'motion/hover-ungated',
+        'hover 位移/缩放没有指针精度门控 —— 触屏点击会触发假 hover，包进 @media (hover: hover) and (pointer: fine)'));
+    }
+  }
+
+  if (markup || script) {
+    // Framer Motion shorthands run on the main thread via rAF and drop frames
+    // under load; the full transform string stays on the compositor.
+    lines.forEach((raw, i) => {
+      if (/\banimate\s*=\s*\{\{[^}]{0,200}?\b(?:x|y|scale|rotate)\s*:/i.test(raw)) {
+        counts.rule('motion/framer-shorthand', () => add('WARN', file, i + 1, 'motion/framer-shorthand',
+          'Framer Motion 的 x/y/scale 简写走主线程 rAF，负载下掉帧 —— 改用完整 transform 字符串'));
+      }
+    });
+
+    // non-passive scroll / wheel / touch listeners
+    for (const m of full.matchAll(/addEventListener\(\s*["'](?:scroll|wheel|touchstart|touchmove|mousewheel)["']([\s\S]{0,140}?)\)/gi)) {
+      if (/passive/i.test(m[1])) continue;
+      const line = full.slice(0, m.index).split('\n').length;
+      counts.rule('motion/passive-listener', () => add('WARN', file, line, 'motion/passive-listener',
+        'scroll/wheel/touch 监听未声明 passive —— 浏览器无法与滚动并行处理'));
+      break;
+    }
+  }
+}
+
 function auditDependencies(file, full, packageJson, counts) {
   if (!packageJson) return;
   if (!['.js', '.jsx', '.ts', '.tsx', '.mjs', '.vue', '.svelte', '.astro'].includes(extname(file).toLowerCase())) return;
@@ -363,6 +433,7 @@ function main() {
     auditContent(file, lines, counts);
     auditAccessibility(file, lines, text, counts);
     auditAiTells(file, lines, text, counts);
+    auditMotion(file, lines, text, counts);
     auditDependencies(file, text, lookupPkg(file), counts);
   }
 
