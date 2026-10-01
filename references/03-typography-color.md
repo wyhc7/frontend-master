@@ -47,6 +47,28 @@ P2/P3 阶段使用。排版与色彩是**两套可判定的数值系统**：所�
 
 硬约束：正文行长 `45–80ch`、容器 `max-width: 62ch`，超 90ch 判定失败；字号越大字距越小（反向只允许在 Brutalist 方向）；负字距配紧行高、正字距配松行高；全大写标签只允许出现一处且必须携带分类信息（否则命中 `07` 的 B2）。
 
+### 垂直居中按 cap height，不按 line box
+
+`align-items: center` 居中的是**行盒**，不是字形的视觉中心。字体的 em 盒里 ascender 与 descender 并不对称（多数无衬线字体的 descender 更深、上空更大），所以大字号标题垂直居中时会整体偏低，**字号越大偏得越明显**，而小字上看不出来。同一个组件换一套字体就会再偏一次。
+
+按可用性排序的三种解法：
+
+1. **原生裁切**（最干净）。`text-box-trim` 配合 `text-box-edge` 直接按字形边缘裁掉行盒上下的空白，此后居中就是视觉居中：
+
+```css
+.display {
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;   /* 上边顶到 cap 高，下边贴基线 */
+}
+```
+
+   两者同属 CSS Inline Layout Level 3，Baseline 2026（2026-08 起）在主流浏览器稳定可用；老浏览器需要回退到下面两种，不要当成唯一手段。
+
+2. **收紧行盒**。`line-height: 1` 或略小，把多余空白压掉，再靠容器的 margin/gap 控制节奏。多数场景够用，且没有兼容性负担。
+3. **手动补偿**。`transform: translateY(-0.05em)` 一类微调。只在**固定字号、固定字体**的单处使用——换字体或换字号即失效，属于临时手段。
+
+判据：把区块的临时边框打开，看大标题在容器里是否**视觉**居中。如果靠肉眼调 margin 让它"看起来"居中，那就埋了一颗只有换字体时才会引爆的雷。
+
 ## C. 字对选取
 
 数据层有 **74 组真实字对**（含 `Heading Font` / `Body Font` / `Mood Keywords` / `Best For` / `CSS Import` / `Tailwind Config`），按语义检索而非按记忆：

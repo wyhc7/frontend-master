@@ -1,6 +1,6 @@
 ---
 name: frontend-master
-description: 最强前端 skill——七源融合：审美方法论与两遍法（anthropic frontend-design）+ 界面规范与性能分级（Vercel Web Interface Guidelines / React Best Practices）+ 反 AI 味黑名单与旋钮量化（taste-skill）+ 设计操作符（impeccable）+ BM25 设计智能检索层（ui-ux-pro-max：88 风格 / 192 产品配色 / 74 字对 / 119 UX 规则 / 44 React 性能规则 / 17 动效预设 / 22 技术栈）+ 网页动效实现层（GSAP 官方 skills：核心 API / 时间轴 / ScrollTrigger / 插件已全免费 / React 与框架集成）+ 动效品味标准（emilkowalski/skills：频率门 / 缓动决策树 / 时长分档 / 物理性禁令）。任何涉及构建、重设计、评审界面与前端代码的任务都应触发：页面、落地页、仪表盘、组件、移动端 UI、HTML/CSS/JS/React/Vue/Svelte/Next.js、审美方向选择、排版配色、动效与网页动画效果（GSAP / ScrollTrigger / 滚动叙事 / 页面过渡 / 微交互 / 逐帧验证）、设计系统抽取、无障碍与性能审计、"这个页面看起来太 AI 了"。
+description: 最强前端 skill——八源融合：审美方法论与两遍法（anthropic frontend-design）+ 界面规范与性能分级（Vercel Web Interface Guidelines / React Best Practices）+ 反 AI 味黑名单与旋钮量化（taste-skill）+ 设计操作符（impeccable）+ BM25 设计智能检索层（ui-ux-pro-max：88 风格 / 192 产品配色 / 74 字对 / 119 UX 规则 / 44 React 性能规则 / 17 动效预设 / 22 技术栈）+ 网页动效实现层（GSAP 官方 skills：核心 API / 时间轴 / ScrollTrigger / 插件已全免费 / React 与框架集成）+ 动效品味标准（emilkowalski/skills：频率门 / 缓动决策树 / 时长分档 / 物理性禁令）+ 反默认抽签与量产物校准（RuiC-motion-reel：抽签定风格并落盘 STYLE.md / 截图亮度量到参考上）。任何涉及构建、重设计、评审界面与前端代码的任务都应触发：页面、落地页、仪表盘、组件、移动端 UI、HTML/CSS/JS/React/Vue/Svelte/Next.js、审美方向选择、排版配色、动效与网页动画效果（GSAP / ScrollTrigger / 滚动叙事 / 页面过渡 / 微交互 / 逐帧验证）、设计系统抽取、无障碍与性能审计、"这个页面看起来太 AI 了"。
 ---
 
 # Frontend Master
@@ -19,8 +19,11 @@ description: 最强前端 skill——七源融合：审美方法论与两遍法�
 | `ui-ux-pro-max` | **BM25 检索引擎**：88 风格（50 active）· 192 产品配色 · 74 官方字对 · 119 UX 规则 · 44 React 性能规则 · 17 动效预设 · 25 图表类型 · 105 图标 · 22 技术栈（1260 条规则） |
 | `greensock/gsap-skills`（GSAP 官方） | 网页动效实现层：核心 API、时间轴、ScrollTrigger、插件全免费现状、React 与框架集成、性能红线 |
 | `emilkowalski/skills` | 动效品味与标准：频率门（该不该动）、缓动决策树、时长分档、物理性禁令、可打断性、逐帧验证 |
+| `HRuiCcc/RuiC-motion-reel` | **反默认抽签制**（引擎总做它最响的那张，所以默认是抽签而不是重复）、每张风格牌带一条「最容易做坏」、**量产物而非看感觉**（亮度 mean/median/p95 对着参考量，偏离 2× 判定管线故障） |
 
-这些来源都缺的一环由本 skill 补上：**可机器验证的自检闭环**（`scripts/audit.mjs` + 截图比对）——`motion/*` 规则让动效质量同样进得了门禁。
+`RuiC-motion-reel` 是 Python + ffmpeg 的**视频动态图形**产线，赛道与网页不同——只借上面这三个机制，不借它的引擎与实现。
+
+这些来源都缺的一环由本 skill 补上：**可机器验证的自检闭环**（`scripts/audit.mjs` 读源码 + `scripts/measure.mjs` 读渲染产物）——`motion/*` 规则与亮度量化让动效质量同样进得了门禁。
 
 ## 触发与不触发
 
@@ -82,7 +85,18 @@ node ~/.dsh/skills/frontend-master/scripts/data.mjs check
 
 禁止方向写成"现代、简洁、专业"。从 `references/02-aesthetic-directions.md` 里选一个**具名方向**（Editorial Broadsheet / Swiss / Brutalist / Terminal / Luxury Serif / Warm Organic / Retro-Futurist / Maximalist Collage / Quiet Minimalism / Data-Dense Dashboard / Playful Toy / Neo-Memphis），并采用它的 token 配方。
 
-选完立刻做**反默认自查**：这个方向是不是我不看简报也会选的？是就换。
+**没被点名时，方向由抽签决定，不由你挑**：
+
+```bash
+node ~/.dsh/skills/frontend-master/scripts/style_lottery.mjs --list          # 看整副牌
+node ~/.dsh/skills/frontend-master/scripts/style_lottery.mjs --write .       # 抽一张，落盘成 STYLE.md
+```
+
+留给你自己挑，你会一次又一次做出同一个页面——紫靛渐变、玻璃拟态、居中大标题加三张卡。那只是 12 张牌里的**一张**，不是本 skill 的风格。**牌堆里有一半在响度 4 以下**，安静的方向做干净了同样成立，不要因为"这张不够炫"换牌。抽签结果写进项目的 `STYLE.md`，后续改动有据可依。
+
+排掉抽签只有两种情况：**用户在简报里点名了风格或给了参考片**（那就用它，简报原话永远赢）；**你在改一个已有的页面**（顺着它现有的方向走，不要换掉它的骨架）。
+
+方向来自以上两种情况之一时，仍要做**反默认自查**：这个方向是不是我不看简报也会选的？是就换。
 
 **简报点名了某种具体风格、或你不确定这个品类该长什么样时**，先查检索层再定：
 
@@ -159,7 +173,15 @@ node ~/.dsh/skills/frontend-master/scripts/audit.mjs <目录或文件...>
 
 审计器只做**可机械判定**的检查（缺失 alt、无 label、禁用缩放、占位内容、统一圆角、重复阴影、`transition: all`、未声明依赖等）。构图意图、层级是否编码信息、文案是否贴合主体——这些机器判不了，走第 2 条。
 
-2. **视觉复核**（有渲染环境时必做）：截图 → 与自己的设计提案（或竞品参照）做像素/结构比对 → 肉眼审一遍。协议见 `references/08-critique.md`。
+2. **视觉复核**（有渲染环境时必做）：截图 → **先量，再看** → 落到 `file:line`。协议见 `references/08-critique.md`。
+
+```bash
+node ~/.dsh/skills/frontend-master/scripts/measure.mjs shot.png                 # 亮度分布与判定
+node ~/.dsh/skills/frontend-master/scripts/measure.mjs shot.png --ref ref.png   # 与参考片/设计稿对照
+node ~/.dsh/skills/frontend-master/scripts/measure.mjs shot.png --grid          # 3×3 分块，查局部过曝或死黑
+```
+
+暗色页面最常见的病是**整体亮了 2~3 倍**，而肉眼看不出来——显示器会骗你，数字不会。判据：暗场的中位亮度应落在 `5–30`；中位或均值偏离参考超过 2 倍即退出非零，这通常不是"颜色没调好"，而是管线里多做了一次线性 → sRGB 编码，**去查编码链路，不要用调色去补**。
 
 ## Quality Floor（不可协商，任何风格都不许跌破）
 
@@ -216,7 +238,7 @@ node ~/.dsh/skills/frontend-master/scripts/audit.mjs <目录或文件...>
 | 文件 | 何时读 |
 |---|---|
 | `references/01-design-read.md` | P0 阶段，做需求推断与旋钮推导 |
-| `references/02-aesthetic-directions.md` | P1 阶段，选方向、取 token 配方 |
+| `references/02-aesthetic-directions.md` | P1 阶段，选方向、取 token 配方；12 个方向各带一条「最容易做坏」 |
 | `references/03-typography-color.md` | P2/P3，排版与色彩系统 |
 | `references/04-motion.md` | 涉及任何动画、过渡、滚动 |
 | `references/05-layout-architecture.md` | 布局、栅格、间距、层叠 |
@@ -231,6 +253,8 @@ node ~/.dsh/skills/frontend-master/scripts/audit.mjs <目录或文件...>
 | 脚本 | 用途 | 依赖 |
 |---|---|---|
 | `scripts/audit.mjs` | P4 机器审计，`file:line` + CRITICAL/WARN，非零退出即未通过；含 `motion/*` 动效规则 | 仅需 Node |
+| `scripts/style_lottery.mjs` | P1 抽签定方向：12 张牌带响度标注，`--write` 落盘 `STYLE.md`；`--list` / `--seed` / `--avoid` / `--json` | 仅需 Node |
+| `scripts/measure.mjs` | P4 量产物：截图亮度 mean/median/p05/p95 + 3×3 分块 + `--ref` 对照（偏离 2× 退出非零）；零依赖 PNG 解码 | 仅需 Node（JPEG 可选走 ffmpeg） |
 | `scripts/data.mjs` | 检索层桥接（转发到 BM25 引擎），`check` 子命令做环境自检 | Node + Python 3 + ui-ux-pro-max |
 | `scripts/selftest/` | 两个夹具：`deliberately-bad.html` 必须被抓满，`clean.html` 必须零告警 | 仅需 Node |
 
@@ -253,6 +277,8 @@ node ~/.dsh/skills/frontend-master/scripts/audit.mjs scripts/selftest/clean.html
 | 越改越乱 | 一次动多个变量 | 一次一个操作符，改完截图复核 |
 | 用了不存在的库/API | 没做依赖验证 | `audit.mjs` 的 `eng/unverified-dep` 会抓；写码前先查 `package.json` |
 | 检索层查不到就硬编 | 没走仲裁规则第 3 条 | 如实说无匹配，退回静态层的具名方向 |
+| 挑不出毛病，但很眼熟 | 方向是自己挑的，且挑到了最顺手的那个 | 跑 `style_lottery.mjs` 重抽，抽到哪张做哪张 |
+| 暗色页面偏亮或发灰 | 只靠肉眼判断，从没量过 | `measure.mjs` 量中位亮度，与参考对照后再改 |
 
 ## 文件维护约束（防止自动化改动破坏本 skill）
 
@@ -261,6 +287,10 @@ node ~/.dsh/skills/frontend-master/scripts/audit.mjs scripts/selftest/clean.html
 - 不许把行首的 `---` 转义成 `\---`，也不许在行尾补 Markdown 硬换行空格。
 - 不许对表格做对齐填充（保持 `|---|---|` 紧凑形式），填充会虚增行宽并污染 diff。
 - 正文里的 `---` 分隔线、YAML frontmatter 定界符必须保持原样。
+
+改了 `references/02-aesthetic-directions.md` 里某个方向的定位、色板、字体或「最容易做坏」时，**同步更新 `scripts/style_lottery.mjs` 的 `DECK`**——牌堆是它的镜像，两处不一致会让抽出来的风格与配方对不上。
+
+改过 `scripts/audit.mjs` 或 `scripts/measure.mjs` 后，用夹具与基准图各回归一次（`measure.mjs` 有没有解错 PNG，用一个已知色的图对一眼均值即可）。
 
 改过本目录任何 `.md` 后，用以下命令验证 frontmatter 未被破坏：
 

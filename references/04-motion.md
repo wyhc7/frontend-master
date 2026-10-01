@@ -114,7 +114,11 @@
 | `expo.inOut` | `cubic-bezier(1, 0, 0, 1)` |
 | `sine.inOut` | `cubic-bezier(0.445, 0.05, 0.55, 0.95)` |
 
-`back.out(1.4)` 与 `elastic.out` **没有精确的 `cubic-bezier` 等价物**（回弹幅度是参数化的，CSS 三次贝塞尔无法表达过冲后的振荡）——要它们就必须用 GSAP，或改用 `linear()` 采样曲线。禁止用 `ease`、`ease-in-out`、`linear` 处理 UI 反馈：前者是浏览器默认的不对称曲线，后者是机械匀速。
+`back.out(1.4)` 与 `elastic.out` **没有精确的 `cubic-bezier` 等价物**（回弹幅度是参数化的，CSS 三次贝塞尔无法表达过冲后的振荡）——要它们就必须用 GSAP，或改用 `linear()` 采样曲线。
+
+但**单次过冲**是 CSS 能表达的：`back.out(1.7)` 这种标准量只过冲一次、不振荡，可用 `cubic-bezier(0.34, 1.56, 0.64, 1)` 近似（`y1 > 1` 正是过冲的来源，两者过冲量都在 10% 上下——是近似，不是精确等值）。**要调过冲量就只能回 GSAP。**
+
+禁止用 `ease`、`ease-in-out`、`linear` 处理 UI 反馈：前者是浏览器默认的不对称曲线，后者是机械匀速。
 
 ### C4. 非对称计时
 
@@ -181,6 +185,34 @@ CSS **transition 能在半途被重定向**，**keyframes 会从零重启**。�
 }
 ```
 
+### D6. 落位压印
+
+元素落位的那一瞬间给它一点力，很快回落——读起来是"按下去"，而不是"滑到位就不动了"。最省事的做法是**让缓动曲线自己过冲**，不需要写分帧：
+
+```css
+.settle {
+  animation: settle 180ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes settle {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+```
+
+曲线在 60% 附近把 `scale` 推过 1（约 `1.02`）再收回 ✔。想要"闪一下"的亮度压印（落位瞬间提亮再回落），就得写三档关键帧：
+
+```css
+@keyframes settle-bright {
+  0%   { opacity: 0; }
+  62%  { opacity: 1; transform: scale(1.015); filter: brightness(1.06); }
+  100% { opacity: 1; transform: scale(1);     filter: brightness(1); }
+}
+```
+
+时长短（120–200ms）、量小（scale `1.01–1.02`、brightness `1.04–1.08`）。
+
+**只用在一次编排的入场里**。每个卡片 hover、每个 section 都压印，就变成"整站都在抖"——与 `07` C2 的"无差别入场"是同一个病。GSAP 里它就是 `back.out`：`gsap.from(el, { scale: 0.94, opacity: 0, ease: 'back.out(1.4)' })`。
+
 ---
 
 ## E. 核心克制原则
@@ -193,6 +225,7 @@ CSS **transition 能在半途被重定向**，**keyframes 会从零重启**。�
 - 交互反馈必须说明"**什么变了**"：位移 ≤ 2px 表示按压（数据层真实约束），≤ 4px + 阴影表示抬起。反馈幅度与元素的可点击性成正比——纯文本行只变底色，可点击卡才抬起。
 - 每屏动效预算：1 个入场 + 每个可交互元件 1 个反馈。超出预算的动画一律删掉，而不是调快。
 - **stagger 是装饰性的，不许挡住交互**：列表中每一项在动画播完前必须已经可点击。
+- **实现顺序：结构 → 内容 → 交互 → 装饰，装饰一律最后加。** 角标、徽章、纹理、坐标线、HUD 式读数最容易在实现过程中不知不觉堆起来（`07` 的 A5 / B2 / B3 全是这一类）。装饰加完回头再看一次主体：**如果视线先落在装饰上，删装饰**——它是配角，不是卖点。
 
 ---
 
