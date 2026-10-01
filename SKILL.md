@@ -1,6 +1,6 @@
 ---
 name: frontend-master
-description: 最强前端 skill——八源融合：审美方法论与两遍法（anthropic frontend-design）+ 界面规范与性能分级（Vercel Web Interface Guidelines / React Best Practices）+ 反 AI 味黑名单与旋钮量化（taste-skill）+ 设计操作符（impeccable）+ BM25 设计智能检索层（ui-ux-pro-max：88 风格 / 192 产品配色 / 74 字对 / 119 UX 规则 / 44 React 性能规则 / 17 动效预设 / 22 技术栈）+ 网页动效实现层（GSAP 官方 skills：核心 API / 时间轴 / ScrollTrigger / 插件已全免费 / React 与框架集成）+ 动效品味标准（emilkowalski/skills：频率门 / 缓动决策树 / 时长分档 / 物理性禁令）+ 反默认抽签与量产物校准（RuiC-motion-reel：抽签定风格并落盘 STYLE.md / 截图亮度量到参考上）。任何涉及构建、重设计、评审界面与前端代码的任务都应触发：页面、落地页、仪表盘、组件、移动端 UI、HTML/CSS/JS/React/Vue/Svelte/Next.js、审美方向选择、排版配色、动效与网页动画效果（GSAP / ScrollTrigger / 滚动叙事 / 页面过渡 / 微交互 / 逐帧验证）、设计系统抽取、无障碍与性能审计、"这个页面看起来太 AI 了"。
+description: 构建、重设计或评审网页与前端的 skill：产出不像 AI 做的界面，且由可执行的门禁复核，而非"看起来不错"。含具名审美方向库与抽签定风格（没被点名时不靠自选）、排版与色彩 token、动效实现、无障碍与性能审计；交付前跑 audit.mjs（扫源码，CRITICAL 退出非零）与 measure.mjs（量截图亮度，与参考偏离 2 倍退出非零）。触发：页面、落地页、营销站、仪表盘、后台界面、组件、移动端 UI、设计系统抽取；HTML/CSS/JS/TS/React/Vue/Svelte/Next.js/Tailwind；审美方向与视觉风格选择、排版配色、间距栅格、字体字阶；网页动画与动效（GSAP / ScrollTrigger / 滚动叙事 / 页面过渡 / 微交互 / 缓动时长 / 逐帧验证）；无障碍、性能、CLS 与布局跳动；以及"这个页面看起来太 AI 了""太模板了""没设计感"这类评审请求。
 ---
 
 # Frontend Master
