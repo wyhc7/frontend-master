@@ -95,6 +95,101 @@ function bump(map, key) {
   map.set(k, (map.get(k) || 0) + 1);
 }
 
+// ------------------------------------------------------- comment stripping
+
+/**
+ * Blank comment bodies while keeping every offset intact (spaces, same length),
+ * so reported line numbers and match indices stay correct.
+ *
+ * A comment is prose for a human reader. Quoting a counter-example in one is
+ * documentation, not code, and a rule that fires on commented-out markup is
+ * reporting on something that never ships.
+ *
+ * Matching is non-greedy and requires a closer, so an unclosed `/*` or `<!--`
+ * is left alone instead of swallowing the rest of the file. Note that `.html`
+ * needs CSS comments too: a `/* ... *\/` inside `<style>` would otherwise leak
+ * into the selector of the next rule and change how it is classified.
+ */
+const COMMENT_KIND = {
+  '.html': { html: true, block: true, line: false },
+  '.htm': { html: true, block: true, line: false },
+  '.css': { html: false, block: true, line: false },
+  '.scss': { html: false, block: true, line: true },
+  '.sass': { html: false, block: true, line: true },
+  '.less': { html: false, block: true, line: true },
+  '.js': { html: false, block: true, line: true },
+  '.mjs': { html: false, block: true, line: true },
+  '.ts': { html: false, block: true, line: true },
+  '.jsx': { html: true, block: true, line: true },
+  '.tsx': { html: true, block: true, line: true },
+  '.vue': { html: true, block: true, line: true },
+  '.svelte': { html: true, block: true, line: true },
+  '.astro': { html: true, block: true, line: true },
+};
+
+const blankOut = (s) => s.replace(/[^\n]/g, ' ');
+
+function stripComments(lines, ext) {
+  const kind = COMMENT_KIND[ext];
+  if (!kind) return lines;
+  let text = lines.join('\n');
+  if (kind.block) text = text.replace(/\/\*[\s\S]*?\*\//g, blankOut);
+  if (kind.html) text = text.replace(/<!--[\s\S]*?-->/g, blankOut);
+  const out = text.split('\n');
+  if (!kind.line) return out;
+  return out.map((line) => {
+    let i = 0;
+    for (;;) {
+      const p = line.indexOf('//', i);
+      if (p === -1) return line;
+      // `//` immediately after a colon is part of a URL, not a comment
+      if (line[p - 1] !== ':') return line.slice(0, p) + ' '.repeat(line.length - p);
+      i = p + 2;
+    }
+  });
+}
+
+// ------------------------------------------------------------ css structure
+
+/**
+ * Every innermost `selector { body }` pair, with absolute offsets into the text.
+ * An `@media` wrapper is skipped in favour of the rule it contains, which is
+ * what callers want to reason about.
+ */
+function cssBlocks(text) {
+  const out = [];
+  const re = /([^{}]*)\{([^{}]*)\}/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    out.push({
+      sel: m[1].trim(),
+      body: m[2],
+      start: m.index + m[1].length,
+      end: m.index + m[0].length,
+    });
+  }
+  return out;
+}
+
+/** Absolute offset at which each line begins. */
+function lineOffsets(lines) {
+  const out = [];
+  let acc = 0;
+  for (const l of lines) { out.push(acc); acc += l.length + 1; }
+  return out;
+}
+
+const FOCUS_OFF = /outline\s*:\s*(?:none|0)\b/i;
+
+/**
+ * A visible replacement for the focus ring. It only counts inside a `:focus`
+ * block: a `box-shadow` sitting on a resting selector is decoration, and
+ * accepting it there would excuse the classic
+ * `.input { outline: none; box-shadow: 0 2px 8px rgba(0,0,0,.1); }`.
+ */
+const FOCUS_INDICATOR =
+  /box-shadow\s*:|\bborder(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-(?:color|width|style))?\s*:|outline-(?:color|width|style|offset)\s*:|text-decoration\s*:|(?:backdrop-)?filter\s*:|\bbackground(?:-color|-image)?\s*:|\bfill\s*:|\bstroke\s*:/i;
+
 function auditAccessibility(file, lines, full, counts) {
   const ext = extname(file).toLowerCase();
   const markup = MARKUP_EXT.has(ext);
@@ -106,6 +201,20 @@ function auditAccessibility(file, lines, full, counts) {
   for (const m of full.matchAll(/<label[^>]*\b(?:for|htmlFor)\s*=\s*["'{]([^"'}\s]+)["'}]/g)) {
     labeled.add(m[1]);
   }
+
+  // Ranges covered by a wrapping <label> ... </label>. These are matched across
+  // the whole file, not line by line: the control usually sits on its own line,
+  // two or three lines below the opening tag.
+  const labelRanges = [];
+  for (const m of full.matchAll(/<label\b[^>]*>[\s\S]*?<\/label>/gi)) {
+    labelRanges.push([m.index, m.index + m[0].length]);
+  }
+
+  const blocks = cssBlocks(full);
+  const starts = lineOffsets(lines);
+  // Does the file draw a focus ring anywhere? Used to excuse a bare
+  // `.btn { outline: none }` when a `:focus-visible` rule puts the ring back.
+  const fileHasFocusRing = blocks.some((b) => /:focus/.test(b.sel) && FOCUS_INDICATOR.test(b.body));
 
   lines.forEach((raw, i) => {
     const line = i + 1;
@@ -129,17 +238,25 @@ function auditAccessibility(file, lines, full, counts) {
       if (/\b(aria-label|aria-labelledby|title)\s*=/i.test(attrs)) continue;
       const id = (attrs.match(/\bid\s*=\s*["'{]([^"'}\s]+)["'}]/) || [])[1];
       if (id && labeled.has(id)) continue;
-      // wrapped in a <label> (heuristic: an unclosed <label> shortly before)
-      const before = raw.slice(0, m.index ?? 0);
-      const lastOpen = before.lastIndexOf('<label');
-      const lastClose = before.lastIndexOf('</label>');
-      if (lastOpen > lastClose) continue;
+      // wrapped in a <label> ... </label>, across any number of lines
+      const at = starts[i] + (m.index ?? 0);
+      if (labelRanges.some(([s, e]) => at > s && at < e)) continue;
       counts.rule('a11y/control-label', () => add('CRITICAL', file, line, 'a11y/control-label', `<${tag}> 没有可访问名称（需要 <label for>、包裹式 label 或 aria-label）`));
     }
 
-    // outline removal
-    if (/outline\s*:\s*(none|0)\b/i.test(raw)) {
-      counts.rule('a11y/focus-outline', () => add('CRITICAL', file, line, 'a11y/focus-outline', '移除了 outline —— 必须用 :focus-visible 提供等价可见焦点'));
+    // outline removal -- a finding only when nothing visibly replaces it.
+    // The shipped idiom drops the UA outline and draws a ring with box-shadow in
+    // the same :focus-visible block; that must stay silent. A file that restores
+    // the ring on its own :focus rule also excuses a bare `.btn { outline: none }`.
+    if (FOCUS_OFF.test(raw)) {
+      const at = starts[i] + raw.search(FOCUS_OFF);
+      const owner = blocks.find((b) => at > b.start && at < b.end);
+      const inFocusSel = owner ? /:focus/.test(owner.sel) : false;
+      const owned = owner ? FOCUS_INDICATOR.test(owner.body) : FOCUS_INDICATOR.test(raw);
+      if (!((inFocusSel && owned) || (!inFocusSel && fileHasFocusRing))) {
+        counts.rule('a11y/focus-outline', () => add('CRITICAL', file, line, 'a11y/focus-outline',
+          '移除了 outline 且没有替代的可见焦点指示 —— 在 :focus-visible 里用 box-shadow 或边框给出等价焦点环'));
+      }
     }
 
     // zoom disabled
@@ -419,7 +536,10 @@ function main() {
     } catch {
       continue;
     }
-    const lines = text.split(/\r?\n/);
+    // Comments are blanked (offsets preserved) before any rule runs: a comment
+    // is documentation, and quoting a bad pattern in one must not report.
+    const lines = stripComments(text.split(/\r?\n/), extname(file).toLowerCase());
+    const full = lines.join('\n');
     const counts = {
       perRule: new Map(),
       rule(key, fn) {
@@ -431,10 +551,10 @@ function main() {
     };
 
     auditContent(file, lines, counts);
-    auditAccessibility(file, lines, text, counts);
-    auditAiTells(file, lines, text, counts);
-    auditMotion(file, lines, text, counts);
-    auditDependencies(file, text, lookupPkg(file), counts);
+    auditAccessibility(file, lines, full, counts);
+    auditAiTells(file, lines, full, counts);
+    auditMotion(file, lines, full, counts);
+    auditDependencies(file, full, lookupPkg(file), counts);
   }
 
   // ---- whole-scope judgements

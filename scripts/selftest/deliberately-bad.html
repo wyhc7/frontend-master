@@ -51,7 +51,12 @@
 
   <div class="hero" style="background: linear-gradient(135deg, #6366f1, #8b5cf6)"></div>
 
-  <!-- Framer Motion 简写：animate={{ x: 100 }} —— 走主线程 rAF，负载下掉帧 -->
+  <!-- Framer Motion 的 x/y 简写走主线程 rAF，负载下掉帧。
+       这行注释里也带着违规写法 animate={{ x: 100 }} —— 规则必须跳过注释，
+       只扫下面真正会执行的代码。 -->
+  <script type="text/jsx">
+    const Card = () => <motion.div animate={{ x: 100 }} />;
+  </script>
   <script>
     // 非 passive 监听（滚动线程无法并行处理）
     window.addEventListener('scroll', function () {});

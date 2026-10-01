@@ -2,7 +2,19 @@
   Clean fixture for scripts/audit.mjs -- the negative test.
   This file must produce ZERO findings:
     node scripts/audit.mjs scripts/selftest/clean.html
-  If it reports anything, a rule has a false positive and must be tightened.
+
+  It is written as a NORMAL, well-built page rather than as a set of
+  rule-shaped snippets. A fixture that contains only the patterns a rule
+  already accepts cannot catch false positives -- "0 findings" would prove
+  nothing. So the negative test has to look like the code a careful person
+  actually writes: shipped idioms, multi-line JSX-style markup, and comments
+  that quote counter-examples.
+
+  Three of those idioms have historically tripped the gate:
+    1. the standard focus ring (outline: none + box-shadow on :focus-visible)
+    2. a wrapping <label> written across several lines
+    3. counter-examples quoted inside a comment
+  If any of them reports, the matching rule is wrong -- not this file.
 -->
 <html lang="zh-CN">
 <head>
@@ -25,11 +37,30 @@
     .card { border-radius: 2px; }
     .pill { border-radius: 999px; }
     .field { border-radius: 4px; border: 1px solid var(--rule); }
+
+    /* Shipped focus ring: drop the UA outline, replace it with a two-layer
+       box-shadow. This is the shadcn / Radix / hand-rolled design-system
+       idiom, and it must stay silent. The replacement indicator only counts
+       because it sits in a :focus-visible block. */
+    .field:focus-visible,
+    .cta:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--accent);
+    }
+
+    /* The same idea split across two rules: reset on the base selector, ring
+       put back by a separate :focus-visible block. Equally valid, equally
+       silent -- the file restores the ring, so the reset is not a violation. */
+    .qty { outline: none; }
+    .qty:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+
+    /* Border colour change used as the focus indicator instead of a ring. */
+    .note:focus-visible { outline: none; border-color: var(--accent); }
+
     .cta { transition: transform 160ms cubic-bezier(.22, 1, .36, 1); }
     @media (hover: hover) and (pointer: fine) {
       .cta:hover { transform: translateY(-1px); }
     }
-    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     @media (prefers-reduced-motion: reduce) {
       .cta { transition: none; }
     }
@@ -41,6 +72,13 @@
     <p>每周三烘焙，周四发货。豆子从到港到入炉不超过十天。</p>
   </header>
 
+  <!--
+    Counter-examples quoted in a comment. These are prose for a human reader,
+    not code that ships, so the gate has to skip them:
+      <img src="/beans.webp">           <- no alt
+      <input type="email">              <- no accessible name
+      outline: none;                    <- with no replacement indicator
+  -->
   <main>
     <article class="card">
       <img src="/beans/ethiopia-guji.webp" alt="古吉日晒批次的手检台" width="960" height="540">
@@ -52,10 +90,18 @@
       <label for="email">邮箱</label>
       <input class="field" id="email" name="email" type="email" autocomplete="email">
       <label for="grind">研磨度</label>
-      <select class="field" id="grind" name="grind">
+      <select class="field qty" id="grind" name="grind">
         <option value="whole">不磨</option>
         <option value="filter">手冲</option>
       </select>
+
+      <!-- Wrapping label, written across lines: the control sits on its own
+           line, two lines below the <label>. Still a valid accessible name. -->
+      <label>
+        烘焙备注
+        <input class="field note" name="note" type="text" autocomplete="off">
+      </label>
+
       <button class="cta pill" type="submit">订阅当季批次</button>
     </form>
   </main>

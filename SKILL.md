@@ -256,14 +256,20 @@ node ~/.dsh/skills/frontend-master/scripts/measure.mjs shot.png --grid          
 | `scripts/style_lottery.mjs` | P1 抽签定方向：12 张牌带响度标注，`--write` 落盘 `STYLE.md`；`--list` / `--seed` / `--avoid` / `--json` | 仅需 Node |
 | `scripts/measure.mjs` | P4 量产物：截图亮度 mean/median/p05/p95 + 3×3 分块 + `--ref` 对照（偏离 2× 退出非零）；零依赖 PNG 解码 | 仅需 Node（JPEG 可选走 ffmpeg） |
 | `scripts/data.mjs` | 检索层桥接（转发到 BM25 引擎），`check` 子命令做环境自检 | Node + Python 3 + ui-ux-pro-max |
-| `scripts/selftest/` | 两个夹具：`deliberately-bad.html` 必须被抓满，`clean.html` 必须零告警 | 仅需 Node |
+| `scripts/selftest/` | 两个夹具：`deliberately-bad.html` 必须被抓满（守不漏报），`clean.html` 必须零告警（守不误报） | 仅需 Node |
 
-改过 `audit.mjs` 的规则后，用夹具回归一次：
+改过 `audit.mjs` 的规则后，用夹具**双向**回归：
 
 ```bash
 node ~/.dsh/skills/frontend-master/scripts/audit.mjs scripts/selftest/deliberately-bad.html   # 期望：CRITICAL 11 · WARN 20
 node ~/.dsh/skills/frontend-master/scripts/audit.mjs scripts/selftest/clean.html              # 期望：0 findings
 ```
+
+两个方向都要看：`deliberately-bad` 的计数掉了 = 规则被放松（漏报）；`clean` 开始报 = 规则被收紧（误报）。
+
+**`clean.html` 必须写得像真人会写的规范代码**，而不是一堆"规则形状的片段"——一个只包含规则已经接受的写法的夹具，永远抓不到误报，`0 findings` 也就证明不了任何事。它现在专门收着三类最容易误报的惯用写法：标准焦点环（`:focus-visible` 里 `outline: none` + `box-shadow` 顶替）、跨多行书写的包裹式 `<label>`、注释里引用的反面教材。
+
+规则跑在**剥掉注释之后**的文本上（按语言分派 HTML 注释 / `/* */` / `//`，且**要求有闭合符**，未闭合的 `/*` 不会吞掉文件剩余部分）。往夹具里加样本时注意：反面教材要写成**真代码**才会被抓到，写在注释里属于文档，规则会跳过它。
 
 ## 常见失败模式
 
@@ -279,6 +285,7 @@ node ~/.dsh/skills/frontend-master/scripts/audit.mjs scripts/selftest/clean.html
 | 检索层查不到就硬编 | 没走仲裁规则第 3 条 | 如实说无匹配，退回静态层的具名方向 |
 | 挑不出毛病，但很眼熟 | 方向是自己挑的，且挑到了最顺手的那个 | 跑 `style_lottery.mjs` 重抽，抽到哪张做哪张 |
 | 暗色页面偏亮或发灰 | 只靠肉眼判断，从没量过 | `measure.mjs` 量中位亮度，与参考对照后再改 |
+| 门禁把规范写法判成不可交付 | 规则只看单个特征，没看这个特征是否已被替代 | 先往 `clean.html` 加规范写法当反例，再收紧规则 |
 
 ## 文件维护约束（防止自动化改动破坏本 skill）
 
@@ -291,6 +298,8 @@ node ~/.dsh/skills/frontend-master/scripts/audit.mjs scripts/selftest/clean.html
 改了 `references/02-aesthetic-directions.md` 里某个方向的定位、色板、字体或「最容易做坏」时，**同步更新 `scripts/style_lottery.mjs` 的 `DECK`**——牌堆是它的镜像，两处不一致会让抽出来的风格与配方对不上。
 
 改过 `scripts/audit.mjs` 或 `scripts/measure.mjs` 后，用夹具与基准图各回归一次（`measure.mjs` 有没有解错 PNG，用一个已知色的图对一眼均值即可）。
+
+改规则时按这个顺序：**先往 `clean.html` 加反例**（一段规范写法），确认它在旧规则下**会报**，再改规则让它闭嘴。反过来做的话，只会得到一条"看起来通过了"的规则——夹具一旦被裁成规则的形状，就再也证明不了任何事。
 
 改过本目录任何 `.md` 后，用以下命令验证 frontmatter 未被破坏：
 
